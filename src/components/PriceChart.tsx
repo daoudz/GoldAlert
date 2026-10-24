@@ -3,9 +3,10 @@ import {
   createChart, AreaSeries, CandlestickSeries, LineSeries, ColorType, CrosshairMode, LineStyle,
 } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi, SeriesType, UTCTimestamp } from 'lightweight-charts';
-import type { Candle } from '../lib/types.ts';
+import type { Candle, Lang } from '../lib/types.ts';
 import type { ForecastPoint } from '../lib/analysis.ts';
 import { sma, bollinger } from '../lib/analysis.ts';
+import { localeFor, tr } from '../lib/i18n.ts';
 
 export interface ChartProps {
   candles: Candle[];
@@ -20,6 +21,7 @@ export interface ChartProps {
   forecast?: ForecastPoint[];
   intraday: boolean;
   theme: string;
+  lang: Lang;
 }
 
 const TZ = -new Date().getTimezoneOffset() * 60;
@@ -43,7 +45,7 @@ export function PriceChart(p: ChartProps) {
       rightPriceScale: { borderVisible: false },
       timeScale: { borderVisible: false, timeVisible: p.intraday, secondsVisible: false },
       crosshair: { mode: CrosshairMode.Magnet },
-      localization: { priceFormatter: p.format },
+      localization: { priceFormatter: p.format, locale: localeFor(p.lang) },
       handleScale: { axisPressedMouseMove: false },
     });
     chart.current = c;
@@ -81,7 +83,7 @@ export function PriceChart(p: ChartProps) {
       const lastC = p.candles[p.candles.length - 1];
       const start = { time: t(lastC.time), value: p.conv(lastC.close) };
       const f = (sel: (x: ForecastPoint) => number) => [start, ...p.forecast!.filter((x) => x.time > lastC.time).map((x) => ({ time: t(x.time), value: p.conv(sel(x)) }))];
-      c.addSeries(LineSeries, { color: gold, lineWidth: 2, lineStyle: LineStyle.Dashed, priceLineVisible: false, lastValueVisible: false, title: 'Forecast' }).setData(f((x) => x.value));
+      c.addSeries(LineSeries, { color: gold, lineWidth: 2, lineStyle: LineStyle.Dashed, priceLineVisible: false, lastValueVisible: false, title: tr(p.lang, 'chart.forecastSeries') }).setData(f((x) => x.value));
       const bo = { color: gold + '88', lineWidth: 1 as const, lineStyle: LineStyle.Dotted, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false };
       c.addSeries(LineSeries, bo).setData(f((x) => x.hi));
       c.addSeries(LineSeries, bo).setData(f((x) => x.lo));
@@ -93,7 +95,7 @@ export function PriceChart(p: ChartProps) {
       chart.current = null;
       main.current = null;
     };
-  }, [p.candles, p.kind, p.showAvg, p.showBands, p.forecast, p.theme, p.conv, p.intraday]);
+  }, [p.candles, p.kind, p.showAvg, p.showBands, p.forecast, p.theme, p.lang, p.conv, p.intraday]);
 
   // live tick: update only the last bar (keeps the user's zoom / scroll)
   useEffect(() => {

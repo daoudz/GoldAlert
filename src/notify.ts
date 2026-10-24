@@ -2,7 +2,7 @@ import { signal, effect } from '@preact/signals';
 import { get as idbGet, set as idbSet } from 'idb-keyval';
 import { evaluateAlerts } from './lib/alerts.ts';
 import type { AlertMessage, AlertState } from './lib/alerts.ts';
-import { analysis, daily, rates, settings, spot } from './store.ts';
+import { analysis, daily, rates, settings, spot, t } from './store.ts';
 
 export interface HistoryItem extends AlertMessage {
   time: number;
@@ -73,7 +73,7 @@ export async function rearmTarget(id: string) {
 
 export async function testNotification() {
   const s = spot.value;
-  await showNotification('🔔 GoldAlert test', s ? 'Notifications are working! You will be alerted about big moves and buy/sell chances.' : 'Notifications are working!', 'test');
+  await showNotification(t('alerts.testNotifTitle'), s ? t('alerts.testNotifBody') : t('alerts.testNotifTitle'), 'test');
 }
 
 async function registerPeriodicSync() {

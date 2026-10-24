@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { convert, toUsdOz, OZ_GRAMS } from '../src/lib/units.ts';
 import { sma, ema, rsi, bollinger, holtForecast, analyze, actionGroup } from '../src/lib/analysis.ts';
 import { evaluateAlerts } from '../src/lib/alerts.ts';
+import { isRtl, LANGUAGES, tr } from '../src/lib/i18n.ts';
 import type { Candle, DisplayPrefs, NotifySettings } from '../src/lib/types.ts';
 
 test('unit & karat conversions round-trip accurately', () => {
@@ -104,4 +105,37 @@ test('evaluateAlerts fires once per threshold and re-arms cleanly', () => {
   );
   assert.equal(r3.messages.length, 1);
   assert.equal(r3.messages[0].kind, 'signal');
+});
+
+test('i18n supports English, Arabic, French, and Urdu with RTL detection', () => {
+  assert.deepEqual(LANGUAGES.map((l) => l.code), ['en', 'ar', 'fr', 'ur']);
+  assert.equal(isRtl('en'), false);
+  assert.equal(isRtl('fr'), false);
+  assert.equal(isRtl('ar'), true);
+  assert.equal(isRtl('ur'), true);
+
+  for (const lang of ['en', 'ar', 'fr', 'ur'] as const) {
+    assert.ok(tr(lang, 'nav.home').length > 0);
+    assert.ok(tr(lang, 'home.calc.title').length > 0);
+    assert.ok(tr(lang, 'advice.disclaimer').length > 0);
+  }
+
+  const t0 = 1_700_000_000;
+  const candles: Candle[] = Array.from({ length: 100 }, (_, i) => {
+    const base = 3000 + i * 3;
+    return { time: t0 + i * 86400, open: base, high: base + 10, low: base - 10, close: base };
+  });
+
+  for (const lang of ['ar', 'fr', 'ur'] as const) {
+    const res = analyze({ daily: candles, price: candles[candles.length - 1].close, lang });
+    assert.ok(res);
+    assert.equal(res.factors.length, 5);
+    const alerts = evaluateAlerts(
+      { price: 2900, prevClose: 3000, rates: { USD: 1 }, now: Date.now(), action: 'buy' },
+      { enabled: true, bigMovePct: 1, signals: true, targets: [] },
+      { lang, currency: 'USD', unit: 'gram', karat: 24 },
+      { lastAction: 'hold' },
+    );
+    assert.equal(alerts.messages.length, 2);
+  }
 });

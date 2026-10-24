@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { analysis, daily, loadRange, money, RANGES, settings, spot, toDisplay, unitLabel, rate } from '../store.ts';
+import { analysis, daily, loadRange, money, RANGES, settings, spot, t, toDisplay, unitLabel, rate } from '../store.ts';
 import type { Range } from '../store.ts';
 import { Card, Change, Segmented, Toggle } from '../components/ui.tsx';
 import { PriceChart } from '../components/PriceChart.tsx';
@@ -44,7 +44,7 @@ export function ChartPage() {
   // only recompute the forecast overlay when the underlying daily data changes (not on every tick)
   const forecast = useMemo(() => a?.forecast, [daily.value, !!a]);
   const conv = useMemo(() => (x: number) => toDisplay(x), [st.currency, st.unit, st.karat, r]);
-  const fmt = useMemo(() => (x: number) => money(x), [st.currency]);
+  const fmt = useMemo(() => (x: number) => money(x), [st.currency, st.lang]);
   const first = live[0]?.open;
   const lastV = live[live.length - 1]?.close;
   const intraday = RANGES[range].interval !== '1d';
@@ -58,14 +58,14 @@ export function ChartPage() {
             <div class="muted small">{unitLabel()}</div>
             <div class="chart-price">{s ? money(toDisplay(s.price)) : '—'}</div>
             <div class="small">
-              <Change value={first && lastV ? lastV / first - 1 : null} /> <span class="muted">{RANGES[range].label}</span>
+              <Change value={first && lastV ? lastV / first - 1 : null} /> <span class="muted">{t(RANGES[range].labelKey)}</span>
             </div>
           </div>
-          <Segmented<'area' | 'candles'> small value={kind} options={[{ value: 'area', label: 'Line' }, { value: 'candles', label: 'Candles' }]} onChange={setKind} />
+          <Segmented<'area' | 'candles'> small value={kind} options={[{ value: 'area', label: t('chart.line') }, { value: 'candles', label: t('chart.candles') }]} onChange={setKind} />
         </div>
         <Segmented<Range> value={range} options={(Object.keys(RANGES) as Range[]).map((k) => ({ value: k, label: k }))} onChange={setRange} />
         {err ? (
-          <div class="empty">⚠ Could not load chart data. {err}</div>
+          <div class="empty">{t('chart.loadError')} {err}</div>
         ) : live.length ? (
           <PriceChart
             candles={candles}
@@ -78,24 +78,22 @@ export function ChartPage() {
             forecast={showForecast && forecastAllowed ? forecast : undefined}
             intraday={intraday}
             theme={st.theme}
+            lang={st.lang}
           />
         ) : (
           <div class="chart skeleton" />
         )}
         <div class="legend">
-          {showAvg && <><span><i style={{ background: '#3b82f6' }} />20-day avg</span><span><i style={{ background: '#a855f7' }} />50-day avg</span></>}
-          {showBands && <span><i style={{ background: 'var(--text-3)' }} />Normal range</span>}
-          {showForecast && forecastAllowed && <span><i style={{ background: 'var(--gold)' }} />7-day forecast</span>}
+          {showAvg && <><span><i style={{ background: '#3b82f6' }} />{t('chart.sma20')}</span><span><i style={{ background: '#a855f7' }} />{t('chart.sma50')}</span></>}
+          {showBands && <span><i style={{ background: 'var(--text-3)' }} />{t('chart.bands')}</span>}
+          {showForecast && forecastAllowed && <span><i style={{ background: 'var(--gold)' }} />{t('chart.forecast')}</span>}
         </div>
       </Card>
-      <Card title="Chart tools">
-        <Toggle label="Show 7-day forecast (Month view and longer)" checked={showForecast} onChange={setForecast} />
-        <Toggle label="Show moving averages (trend lines)" checked={showAvg} onChange={setAvg} />
-        <Toggle label="Show normal price range (Bollinger bands)" checked={showBands} onChange={setBands} />
-        <p class="muted small">
-          Tip: when the price touches the bottom of the normal range in a rising market it is often a good moment to buy;
-          touching the top often means it is expensive.
-        </p>
+      <Card title={t('chart.tools')}>
+        <Toggle label={t('chart.toggleForecast')} checked={showForecast} onChange={setForecast} />
+        <Toggle label={t('chart.toggleAvg')} checked={showAvg} onChange={setAvg} />
+        <Toggle label={t('chart.toggleBands')} checked={showBands} onChange={setBands} />
+        <p class="muted small">{t('chart.tip')}</p>
       </Card>
     </div>
   );

@@ -19,6 +19,7 @@ export interface Spot {
   source: string;
 }
 
+export type Lang = 'en' | 'ar' | 'fr' | 'ur';
 export type Unit = 'gram' | 'ounce' | 'kg' | 'tola';
 export type Karat = 24 | 22 | 21 | 18 | 14;
 export type Action = 'strong-buy' | 'buy' | 'hold' | 'sell' | 'strong-sell';
@@ -35,6 +36,7 @@ export interface PriceTarget {
 }
 
 export interface DisplayPrefs {
+  lang?: Lang;
   currency: string;
   unit: Unit;
   karat: Karat;
@@ -50,6 +52,7 @@ export interface NotifySettings {
 }
 
 export interface Settings extends DisplayPrefs {
+  lang: Lang;
   theme: 'dark' | 'light';
   refreshSec: number;
   notify: NotifySettings;

@@ -42,6 +42,7 @@ jobs:
           ALERT_CURRENCY: ${{ vars.ALERT_CURRENCY }}
           ALERT_UNIT: ${{ vars.ALERT_UNIT }}
           ALERT_KARAT: ${{ vars.ALERT_KARAT }}
+          ALERT_LANG: ${{ vars.ALERT_LANG }}
           BIG_MOVE_PCT: ${{ vars.BIG_MOVE_PCT }}
           ALERT_BELOW: ${{ vars.ALERT_BELOW }}
           ALERT_ABOVE: ${{ vars.ALERT_ABOVE }}

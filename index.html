@@ -17,6 +17,10 @@
       try {
         var s = JSON.parse(localStorage.getItem('goldalert.settings.v1') || '{}');
         if (s.theme) document.documentElement.dataset.theme = s.theme;
+        if (s.lang) {
+          document.documentElement.lang = s.lang;
+          document.documentElement.dir = s.lang === 'ar' || s.lang === 'ur' ? 'rtl' : 'ltr';
+        }
       } catch (e) {}
     </script>
   </head>

@@ -1,5 +1,6 @@
 import type { ComponentChildren, JSX } from 'preact';
 import type { Action } from '../lib/types.ts';
+import { t } from '../store.ts';
 
 // ---------------------------------------------------------------- icons
 
@@ -138,13 +139,13 @@ export function Gauge({ score, size = 220 }: { score: number; size?: number }) {
   const s = Math.max(-100, Math.min(100, score));
   const [nx, ny] = pt(s, R - 18);
   return (
-    <svg class="gauge" viewBox="0 0 200 118" width={size} height={size * 0.59} role="img" aria-label={`Signal score ${score}`}>
+    <svg class="gauge" direction="ltr" viewBox="0 0 200 118" width={size} height={size * 0.59} role="img" aria-label={t('gauge.aria', { score })}>
       {segs.map((g) => (
         <path d={arc(g.from + 1.5, g.to - 1.5)} stroke={g.c} stroke-width="16" fill="none" stroke-linecap="butt" />
       ))}
-      <text x="18" y="116" class="gauge-lbl">SELL</text>
-      <text x="100" y="14" class="gauge-lbl" text-anchor="middle">WAIT</text>
-      <text x="182" y="116" class="gauge-lbl" text-anchor="end">BUY</text>
+      <text x="18" y="116" class="gauge-lbl">{t('gauge.sell')}</text>
+      <text x="100" y="14" class="gauge-lbl" text-anchor="middle">{t('gauge.wait')}</text>
+      <text x="182" y="116" class="gauge-lbl" text-anchor="end">{t('gauge.buy')}</text>
       <line x1={cx} y1={cy} x2={nx} y2={ny} stroke="var(--text)" stroke-width="4" stroke-linecap="round" class="needle" />
       <circle cx={cx} cy={cy} r="7" fill="var(--text)" />
     </svg>

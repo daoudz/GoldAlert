@@ -1,16 +1,30 @@
 import { signal, computed, effect } from '@preact/signals';
 import { get as idbGet, set as idbSet } from 'idb-keyval';
-import type { Candle, Settings, Spot } from './lib/types.ts';
+import type { Candle, Lang, Settings, Spot } from './lib/types.ts';
 import { fetchCandles, fetchFx, fetchSpot, scaleCandles } from './lib/data.ts';
 import type { Interval } from './lib/data.ts';
 import { analyze } from './lib/analysis.ts';
-import { convert, FALLBACK_RATES, UNITS } from './lib/units.ts';
+import { convert, FALLBACK_RATES } from './lib/units.ts';
 import { formatMoney } from './lib/format.ts';
+import { formatUnitLabel, isRtl, tr } from './lib/i18n.ts';
+import type { TranslationKey } from './lib/i18n.ts';
 
 // ------------------------------------------------------------------ settings
 
 const SETTINGS_KEY = 'goldalert.settings.v1';
 const CACHE_KEY = 'goldalert.cache.v1';
+
+function guessLang(): Lang {
+  const langs = typeof navigator !== 'undefined' ? navigator.languages || [navigator.language] : [];
+  for (const raw of langs) {
+    const l = (raw || '').toLowerCase();
+    if (l.startsWith('ar')) return 'ar';
+    if (l.startsWith('fr')) return 'fr';
+    if (l.startsWith('ur')) return 'ur';
+    if (l.startsWith('en')) return 'en';
+  }
+  return 'en';
+}
 
 function guessCurrency(): string {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
@@ -26,6 +40,7 @@ function guessCurrency(): string {
 }
 
 export const defaultSettings: Settings = {
+  lang: guessLang(),
   currency: guessCurrency(),
   unit: 'gram',
   karat: 24,
@@ -51,6 +66,8 @@ effect(() => {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
   idbSet('settings', s).catch(() => {});
   document.documentElement.dataset.theme = s.theme;
+  document.documentElement.lang = s.lang;
+  document.documentElement.dir = isRtl(s.lang) ? 'rtl' : 'ltr';
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', s.theme === 'dark' ? '#0b0e11' : '#f5f5f7');
 });
 
@@ -59,6 +76,9 @@ export function updateSettings(patch: Partial<Settings>) {
 }
 export function updateNotify(patch: Partial<Settings['notify']>) {
   settings.value = { ...settings.value, notify: { ...settings.value.notify, ...patch } };
+}
+export function t(key: TranslationKey, vars?: Record<string, string | number>): string {
+  return tr(settings.value.lang, key, vars);
 }
 
 // ------------------------------------------------------------------ market data
@@ -99,10 +119,11 @@ export function toDisplay(usdOz: number, karat = settings.value.karat, unit = se
   return convert(usdOz, rate.value, unit, karat);
 }
 export function money(value: number, compact = false): string {
-  return formatMoney(value, settings.value.currency, compact);
+  return formatMoney(value, settings.value.currency, compact, settings.value.lang);
 }
 export function unitLabel(): string {
-  return `${settings.value.karat}K · per ${UNITS[settings.value.unit].label.toLowerCase()} · ${settings.value.currency}`;
+  const st = settings.value;
+  return formatUnitLabel(st.karat, st.unit, st.currency, st.lang);
 }
 
 export const analysis = computed(() => {
@@ -115,7 +136,8 @@ export const analysis = computed(() => {
     daily: d,
     hourly: hourly.value,
     price: s.price,
-    fmt: (x) => formatMoney(convert(x, r, st.unit, st.karat), st.currency),
+    fmt: (x) => formatMoney(convert(x, r, st.unit, st.karat), st.currency, false, st.lang),
+    lang: st.lang,
   });
 });
 
@@ -193,13 +215,13 @@ export async function refreshFx() {
 
 // chart ranges (fetched on demand, cached for 2 minutes)
 export type Range = '1D' | '1W' | '1M' | '3M' | '1Y' | 'ALL';
-export const RANGES: Record<Range, { interval: Interval; limit: number; label: string }> = {
-  '1D': { interval: '15m', limit: 96, label: 'Today' },
-  '1W': { interval: '1h', limit: 168, label: 'Week' },
-  '1M': { interval: '4h', limit: 186, label: 'Month' },
-  '3M': { interval: '1d', limit: 92, label: '3 months' },
-  '1Y': { interval: '1d', limit: 366, label: 'Year' },
-  ALL: { interval: '1d', limit: 1000, label: 'All' },
+export const RANGES: Record<Range, { interval: Interval; limit: number; labelKey: TranslationKey }> = {
+  '1D': { interval: '15m', limit: 96, labelKey: 'range.1D' },
+  '1W': { interval: '1h', limit: 168, labelKey: 'range.1W' },
+  '1M': { interval: '4h', limit: 186, labelKey: 'range.1M' },
+  '3M': { interval: '1d', limit: 92, labelKey: 'range.3M' },
+  '1Y': { interval: '1d', limit: 366, labelKey: 'range.1Y' },
+  ALL: { interval: '1d', limit: 1000, labelKey: 'range.ALL' },
 };
 const rangeCache = new Map<Range, { t: number; candles: Candle[] }>();
 

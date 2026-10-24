@@ -52,7 +52,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans Arabic', 'Noto Nastaliq Urdu', Tahoma, sans-serif;
   font-size: 15px;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
@@ -135,9 +135,15 @@ code {
   font-weight: 800;
 }
 
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
 .cur-pill {
   width: auto;
-  margin-left: auto;
   background: var(--card-2);
   color: var(--text);
   border: 1px solid var(--border);
@@ -218,8 +224,8 @@ main {
   .tabs a.on {
     background: var(--card-2);
   }
-  .cur-pill {
-    margin-left: 0;
+  .top-actions {
+    margin-inline-start: 0;
   }
   main {
     padding: 22px;
@@ -373,12 +379,15 @@ main {
   background: linear-gradient(90deg, var(--red), var(--hold), var(--green));
   opacity: 0.8;
 }
+[dir='rtl'] .range-track {
+  background: linear-gradient(-90deg, var(--red), var(--hold), var(--green));
+}
 .range-track i {
   position: absolute;
   top: -4px;
   width: 14px;
   height: 14px;
-  margin-left: -7px;
+  margin-inline-start: -7px;
   border-radius: 50%;
   background: var(--text);
   border: 3px solid var(--card);
@@ -485,13 +494,13 @@ main {
   padding: 12px;
   border-radius: 12px;
   background: var(--card-2);
-  border-left: 3px solid var(--hold);
+  border-inline-start: 3px solid var(--hold);
 }
 .factors li.pos {
-  border-left-color: var(--green);
+  border-inline-start-color: var(--green);
 }
 .factors li.neg {
-  border-left-color: var(--red);
+  border-inline-start-color: var(--red);
 }
 .factors p {
   margin: 4px 0 8px;
@@ -641,7 +650,7 @@ main {
   color: var(--text-2);
 }
 .kv b {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 
@@ -665,10 +674,12 @@ main {
   background: color-mix(in srgb, var(--gold) 8%, transparent);
 }
 .ktable tr.sel td:first-child {
-  border-radius: 10px 0 0 10px;
+  border-start-start-radius: 10px;
+  border-end-start-radius: 10px;
 }
 .ktable tr.sel td:last-child {
-  border-radius: 0 10px 10px 0;
+  border-start-end-radius: 10px;
+  border-end-end-radius: 10px;
 }
 .ktable td:first-child {
   display: flex;
@@ -676,7 +687,7 @@ main {
   gap: 10px;
 }
 .num {
-  text-align: right;
+  text-align: end;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -762,7 +773,7 @@ main {
   width: 12px;
   height: 3px;
   border-radius: 2px;
-  margin-right: 6px;
+  margin-inline-end: 6px;
   vertical-align: middle;
 }
 
@@ -1001,7 +1012,7 @@ input[type='range'] {
   color: var(--text-2);
 }
 .steps {
-  padding-left: 20px;
+  padding-inline-start: 20px;
 }
 .steps li {
   margin-bottom: 8px;
@@ -1034,7 +1045,7 @@ input[type='range'] {
   border-radius: 12px;
   background: var(--card-2);
   border: 1px solid var(--border);
-  border-left: 4px solid var(--gold);
+  border-inline-start: 4px solid var(--gold);
   box-shadow: var(--shadow);
   font-size: 13px;
   cursor: pointer;

@@ -1,7 +1,7 @@
 {
   "name": "goldalert",
-  "version": "1.0.0",
-  "description": "Portable PWA for live gold prices, simple buy/sell recommendations, 7-day forecasts, and price alerts (GitHub Pages ready).",
+  "version": "1.1.0",
+  "description": "Portable PWA for live gold prices, simple buy/sell recommendations, 7-day forecasts, and price alerts in English, Arabic, French & Urdu (GitHub Pages ready).",
   "author": "90studio",
   "license": "MIT",
   "homepage": "https://daoudz.github.io/GoldAlert/",

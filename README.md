@@ -6,6 +6,8 @@
     <a href="https://daoudz.github.io/GoldAlert/"><strong>🌐 Open Live Web & Mobile App (daoudz.github.io/GoldAlert)</strong></a>
   </p>
   <p>
+    <img src="https://img.shields.io/badge/Version-v1.1.0-f0b90b?style=flat-square" alt="Version v1.1.0" />
+    <img src="https://img.shields.io/badge/Languages-English%20%7C%20%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9%20%7C%20Fran%C3%A7ais%20%7C%20%D8%A7%D8%B1%D8%AF%D9%88-3b82f6?style=flat-square" alt="Languages" />
     <img src="https://img.shields.io/badge/Platform-Web%20%7C%20iOS%20%7C%20Android%20(PWA)-f0b90b?style=flat-square" alt="Platform" />
     <img src="https://img.shields.io/badge/Hosted%20on-GitHub%20Pages-0ecb81?style=flat-square" alt="GitHub Pages" />
     <img src="https://img.shields.io/badge/License-MIT-blue?style=flat-square" alt="License" />
@@ -15,7 +17,21 @@
 
 ---
 
-**GoldAlert** is a fast, portable **Progressive Web App (PWA)** built by **90studio** for everyday gold buyers, savers, and investors. It tracks live international gold prices in **27 currencies**, converts across every **karat (`24K`, `22K`, `21K`, `18K`, `14K`)** and **weight unit (`Gram`, `Ounce`, `Tola`, `Kilogram`)**, predicts the **7-day price trend**, highlights the **best time to buy**, and sends notifications on big daily moves or when your target price is reached.
+**GoldAlert (`v1.1.0`)** is a fast, portable **Progressive Web App (PWA)** built by **90studio** for everyday gold buyers, savers, and investors. It tracks live international gold prices in **27 currencies**, supports **4 languages (`English`, `العربية`, `Français`, `اردو`)** with full RTL layout support, converts across every **karat (`24K`, `22K`, `21K`, `18K`, `14K`)** and **weight unit (`Gram`, `Ounce`, `Tola`, `Kilogram`)**, predicts the **7-day price trend**, highlights the **best time to buy**, and sends notifications on big daily moves or when your target price is reached.
+
+---
+
+## 🌍 Supported Languages (`v1.1.0`)
+
+| Language | Native Name | Direction | Coverage |
+| :--- | :--- | :---: | :--- |
+| 🇬🇧 **English** | `English` | LTR | Full UI, plain-language buy/sell advice, charts & notifications |
+| 🇸🇦 **Arabic** | `العربية` | RTL | Full UI, Arabic technical analysis explanations, localized units & notifications |
+| 🇫🇷 **French** | `Français` | LTR | Full UI, French technical analysis explanations, localized units & notifications |
+| 🇵🇰 **Urdu** | `اردو` | RTL | Full UI, Urdu technical analysis explanations, localized units (`تولہ` / `گرام`) & notifications |
+
+- **Auto-Detection:** Automatically selects your browser/device language on first visit.
+- **Instant Switching:** Switch languages anytime from the top header pill (`🇬🇧 English`, `🇸🇦 العربية`, `🇫🇷 Français`, `🇵🇰 اردو`) or under **Settings → Display → Language**.
 
 ---
 
@@ -41,7 +57,7 @@
 ## 📖 Usage Guide (For Non-Professionals)
 
 ### 1. Check Live Gold Prices & Your Gold's Value (`Home` Tab)
-1. **Pick your Currency:** Use the currency pill in the top-right corner (`🇺🇸 USD`, `🇪🇺 EUR`, `🇬🇧 GBP`, `🇸🇦 SAR`, `🇦🇪 AED`, `🇰🇼 KWD`, `🇪🇬 EGP`, `🇹🇷 TRY`, `🇮🇳 INR`, and 18 more).
+1. **Pick your Language & Currency:** Use the language pill (`🇬🇧 English`, `🇸🇦 العربية`, `🇫🇷 Français`, `🇵🇰 اردو`) and currency pill (`🇺🇸 USD`, `🇪🇺 EUR`, `🇬🇧 GBP`, `🇸🇦 SAR`, `🇦🇪 AED`, `🇰🇼 KWD`, `🇪🇬 EGP`, `🇹🇷 TRY`, `🇮🇳 INR`, `🇵🇰 PKR`, and 17 more) in the top header.
 2. **Switch Karat & Weight Unit:** Tap `24K`, `22K`, `21K`, or `18K` on the main price card, or switch between **Gram (`g`)**, **Ounce (`oz`)**, and **Tola** in the prices table.
 3. **Calculate Your Gold's Worth:** Under **"How much is my gold worth?"**, enter the weight, unit, and karat of your jewellery, coin, or bar to see its instant market value.
 
@@ -72,7 +88,7 @@ You don't need to read complex trading charts—open the **Advice** tab for a si
 - **24/7 Phone Push (Even When the App is Closed):**
   1. Install the free **ntfy** app on [Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) or [iPhone](https://apps.apple.com/app/ntfy/id1625396347).
   2. In GoldAlert's **Alerts** tab, click **Generate** to create a secret topic name (e.g., `goldalert-x7k2p9`) and subscribe to that topic in the ntfy app.
-  3. In your GitHub repository, open **Settings → Secrets and variables → Actions** and add a repository secret named `NTFY_TOPIC` with that topic name.
+  3. In your GitHub repository, open **Settings → Secrets and variables → Actions** and add a repository secret named `NTFY_TOPIC` with that topic name (and optional variables such as `ALERT_CURRENCY`, `ALERT_UNIT`, `ALERT_KARAT`, and `ALERT_LANG` set to `en`, `ar`, `fr`, or `ur`).
   4. The scheduled workflow [`.github/workflows/alerts.yml`](.github/workflows/alerts.yml) checks live gold prices every 30 minutes and pushes alerts straight to your phone.
 
 ---

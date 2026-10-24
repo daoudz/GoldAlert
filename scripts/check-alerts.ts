@@ -19,7 +19,7 @@ import { fetchCandles, fetchFx, fetchSpot, scaleCandles } from '../src/lib/data.
 import { analyze } from '../src/lib/analysis.ts';
 import { evaluateAlerts, priceIn, describePrefs } from '../src/lib/alerts.ts';
 import type { AlertMessage, AlertState } from '../src/lib/alerts.ts';
-import type { DisplayPrefs, Karat, PriceTarget, Unit } from '../src/lib/types.ts';
+import type { DisplayPrefs, Karat, Lang, PriceTarget, Unit } from '../src/lib/types.ts';
 import { convert, FALLBACK_RATES } from '../src/lib/units.ts';
 import { formatMoney, formatPct } from '../src/lib/format.ts';
 
@@ -29,7 +29,9 @@ const server = (env.NTFY_SERVER || 'https://ntfy.sh').replace(/\/$/, '');
 const stateFile = env.STATE_FILE || '.alert-state/state.json';
 const dry = process.argv.includes('--dry-run');
 
+const lang = ((env.ALERT_LANG || 'en').toLowerCase() as Lang);
 const display: DisplayPrefs = {
+  lang,
   currency: (env.ALERT_CURRENCY || 'USD').toUpperCase(),
   unit: ((env.ALERT_UNIT || 'ounce').toLowerCase() as Unit),
   karat: (Number(env.ALERT_KARAT || 24) as Karat),
@@ -77,8 +79,8 @@ async function main() {
   if (Math.abs(k - 1) > 0.03) k = 1;
   const daily = scaleCandles(d.candles, k);
   const rates = { ...FALLBACK_RATES, ...fx.rates };
-  const fmt = (x: number) => formatMoney(convert(x, rates[display.currency] ?? 1, display.unit, display.karat), display.currency);
-  const a = analyze({ daily, hourly: h ? scaleCandles(h.candles, k) : [], price: spot.price, fmt });
+  const fmt = (x: number) => formatMoney(convert(x, rates[display.currency] ?? 1, display.unit, display.karat), display.currency, false, lang);
+  const a = analyze({ daily, hourly: h ? scaleCandles(h.candles, k) : [], price: spot.price, fmt, lang });
   const prevClose = daily[daily.length - 2].close;
 
   const targets: PriceTarget[] = [];
@@ -100,12 +102,32 @@ async function main() {
   const today = new Date().toISOString().slice(0, 10);
   if (hourStr !== '' && new Date().getUTCHours() >= Number(hourStr) && state.summaryDay !== today) {
     const shown = priceIn(spot.price, rates, display);
+    const priceStr = formatMoney(shown, display.currency, false, lang);
+    const prefsStr = describePrefs(display, lang);
+    const chg1d = formatPct(spot.price / prevClose - 1);
+    const chg7d = a ? formatPct(a.stats.change7d) : '';
+    const title =
+      lang === 'ar'
+        ? `☀️ الذهب اليوم: ${priceStr}`
+        : lang === 'fr'
+          ? `☀️ L'or aujourd'hui : ${priceStr}`
+          : lang === 'ur'
+            ? `☀️ آج سونے کی قیمت: ${priceStr}`
+            : `☀️ Gold today: ${priceStr}`;
+    const body =
+      lang === 'ar'
+        ? `${prefsStr} · ${chg1d} اليوم${a ? ` · ${chg7d} هذا الأسبوع. النصيحة: ${a.headline}.` : ''}`
+        : lang === 'fr'
+          ? `${prefsStr} · ${chg1d} aujourd'hui${a ? ` · ${chg7d} cette semaine. Conseil : ${a.headline}.` : ''}`
+          : lang === 'ur'
+            ? `${prefsStr} · آج ${chg1d}${a ? ` · اس ہفتے ${chg7d}۔ مشورہ: ${a.headline}۔` : ''}`
+            : `${prefsStr} · ${chg1d} today${a ? ` · ${chg7d} this week. Advice: ${a.headline}.` : ''}`;
     messages.push({
       kind: 'summary',
       tag: 'summary',
       priority: 3,
-      title: `☀️ Gold today: ${formatMoney(shown, display.currency)}`,
-      body: `${describePrefs(display)} · ${formatPct(spot.price / prevClose - 1)} today${a ? ` · ${formatPct(a.stats.change7d)} this week. Advice: ${a.headline}.` : ''}`,
+      title,
+      body,
     });
     state.summaryDay = today;
   }

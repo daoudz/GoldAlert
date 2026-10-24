@@ -5,23 +5,25 @@ import { Advice } from './pages/Advice.tsx';
 import { Alerts } from './pages/Alerts.tsx';
 import { SettingsPage } from './pages/Settings.tsx';
 import { Icon, Logo } from './components/ui.tsx';
-import { money, settings, spot, status, toDisplay, updateSettings } from './store.ts';
+import { money, settings, spot, status, t, toDisplay, updateSettings } from './store.ts';
 import { toasts } from './notify.ts';
 import { CURRENCIES } from './lib/units.ts';
+import { LANGUAGES } from './lib/i18n.ts';
+import type { Lang } from './lib/types.ts';
 
 const TABS = [
-  { id: 'home', label: 'Home', icon: 'home' },
-  { id: 'chart', label: 'Chart', icon: 'chart' },
-  { id: 'advice', label: 'Advice', icon: 'advice' },
-  { id: 'alerts', label: 'Alerts', icon: 'bell' },
-  { id: 'settings', label: 'Settings', icon: 'settings' },
+  { id: 'home', labelKey: 'nav.home', icon: 'home' },
+  { id: 'chart', labelKey: 'nav.chart', icon: 'chart' },
+  { id: 'advice', labelKey: 'nav.advice', icon: 'advice' },
+  { id: 'alerts', labelKey: 'nav.alerts', icon: 'bell' },
+  { id: 'settings', labelKey: 'nav.settings', icon: 'settings' },
 ] as const;
 type Tab = (typeof TABS)[number]['id'];
 
 function useHashTab(): Tab {
   const read = (): Tab => {
     const h = location.hash.replace(/^#\/?/, '') as Tab;
-    return TABS.some((t) => t.id === h) ? h : 'home';
+    return TABS.some((x) => x.id === h) ? h : 'home';
   };
   const [tab, setTab] = useState<Tab>(read);
   useEffect(() => {
@@ -40,8 +42,8 @@ export function App() {
   const s = spot.value;
   const st = settings.value;
   useEffect(() => {
-    document.title = s ? `${money(toDisplay(s.price))} · GoldAlert` : 'GoldAlert — Live Gold Prices';
-  }, [s?.price, st.currency, st.unit, st.karat]);
+    document.title = s ? `${money(toDisplay(s.price))} · GoldAlert` : t('app.title');
+  }, [s?.price, st.currency, st.unit, st.karat, st.lang]);
 
   return (
     <div class="app">
@@ -52,23 +54,32 @@ export function App() {
             Gold<b>Alert</b>
           </span>
         </a>
-        <nav class="tabs" aria-label="Main">
-          {TABS.map((t) => (
-            <a href={`#/${t.id}`} class={tab === t.id ? 'on' : ''} aria-current={tab === t.id ? 'page' : undefined}>
-              <Icon name={t.icon} />
-              <span>{t.label}</span>
+        <nav class="tabs" aria-label={t('nav.main')}>
+          {TABS.map((x) => (
+            <a href={`#/${x.id}`} class={tab === x.id ? 'on' : ''} aria-current={tab === x.id ? 'page' : undefined}>
+              <Icon name={x.icon} />
+              <span>{t(x.labelKey)}</span>
             </a>
           ))}
         </nav>
-        <select class="cur-pill" value={st.currency} aria-label="Currency" onChange={(e) => updateSettings({ currency: (e.target as HTMLSelectElement).value })}>
-          {CURRENCIES.map((c) => (
-            <option value={c.code}>
-              {c.flag} {c.code}
-            </option>
-          ))}
-        </select>
+        <div class="top-actions">
+          <select class="cur-pill" value={st.lang} aria-label={t('settings.language')} onChange={(e) => updateSettings({ lang: (e.target as HTMLSelectElement).value as Lang })}>
+            {LANGUAGES.map((l) => (
+              <option value={l.code}>
+                {l.flag} {l.native}
+              </option>
+            ))}
+          </select>
+          <select class="cur-pill" value={st.currency} aria-label={t('settings.currency')} onChange={(e) => updateSettings({ currency: (e.target as HTMLSelectElement).value })}>
+            {CURRENCIES.map((c) => (
+              <option value={c.code}>
+                {c.flag} {c.code}
+              </option>
+            ))}
+          </select>
+        </div>
       </header>
-      {status.value.error && !s && <div class="banner">⚠ Can't reach price servers. Check your connection — retrying automatically.</div>}
+      {status.value.error && !s && <div class="banner">{t('banner.offline')}</div>}
       <main>
         {tab === 'home' && <Home />}
         {tab === 'chart' && <ChartPage />}
@@ -80,10 +91,10 @@ export function App() {
         </footer>
       </main>
       <div class="toasts" aria-live="polite">
-        {toasts.value.map((t) => (
-          <div class={`toast ${t.kind}`} onClick={() => (toasts.value = toasts.value.filter((x) => x.id !== t.id))}>
-            <b>{t.title}</b>
-            <span>{t.body}</span>
+        {toasts.value.map((x) => (
+          <div class={`toast ${x.kind}`} onClick={() => (toasts.value = toasts.value.filter((y) => y.id !== x.id))}>
+            <b>{x.title}</b>
+            <span>{x.body}</span>
           </div>
         ))}
       </div>
