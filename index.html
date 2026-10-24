@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>GoldAlert — Live Gold Prices</title>
+    <meta name="description" content="Live gold prices, simple buy/sell advice, 7-day forecast and alerts for big price moves." />
+    <meta name="theme-color" content="#0b0e11" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GoldAlert" />
+    <link rel="icon" href="./favicon.ico" sizes="48x48" />
+    <link rel="icon" href="./logo.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon-180x180.png" />
+    <script>
+      try {
+        var s = JSON.parse(localStorage.getItem('goldalert.settings.v1') || '{}');
+        if (s.theme) document.documentElement.dataset.theme = s.theme;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <noscript>GoldAlert needs JavaScript to show live prices.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

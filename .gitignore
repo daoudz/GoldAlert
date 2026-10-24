@@ -1,0 +1,6 @@
+node_modules
+dist
+dev-dist
+.alert-state
+*.log
+.DS_Store

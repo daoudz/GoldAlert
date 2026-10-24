@@ -1,0 +1,56 @@
+name: Gold price push alerts
+
+# Checks the gold price every 30 minutes and sends phone notifications through ntfy.sh.
+# Setup: add the repository secret NTFY_TOPIC (Settings → Secrets and variables → Actions).
+# Optional repository variables: ALERT_CURRENCY, ALERT_UNIT, ALERT_KARAT, BIG_MOVE_PCT,
+# ALERT_BELOW, ALERT_ABOVE, DAILY_SUMMARY_HOUR_UTC, SIGNALS.
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alerts
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # remembers what was already notified (so you are not spammed)
+      - uses: actions/cache/restore@v4
+        with:
+          path: .alert-state
+          key: alert-state-${{ github.run_id }}
+          restore-keys: alert-state-
+
+      - name: Check prices and notify
+        run: node scripts/check-alerts.ts
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ALERT_CURRENCY: ${{ vars.ALERT_CURRENCY }}
+          ALERT_UNIT: ${{ vars.ALERT_UNIT }}
+          ALERT_KARAT: ${{ vars.ALERT_KARAT }}
+          BIG_MOVE_PCT: ${{ vars.BIG_MOVE_PCT }}
+          ALERT_BELOW: ${{ vars.ALERT_BELOW }}
+          ALERT_ABOVE: ${{ vars.ALERT_ABOVE }}
+          SIGNALS: ${{ vars.SIGNALS }}
+          DAILY_SUMMARY_HOUR_UTC: ${{ vars.DAILY_SUMMARY_HOUR_UTC || '6' }}
+          APP_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: .alert-state
+          key: alert-state-${{ github.run_id }}
